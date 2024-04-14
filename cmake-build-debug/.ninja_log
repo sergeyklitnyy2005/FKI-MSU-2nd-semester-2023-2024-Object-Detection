@@ -1,0 +1,6 @@
+# ninja log v5
+2	502	7348273629639059	CMakeFiles/FKI_MSU_2nd_semester_2023_2024_Object_Detection.dir/image.c.obj	41225fcd12129d55
+42	1507	7348273639743032	CMakeFiles/FKI_MSU_2nd_semester_2023_2024_Object_Detection.dir/lodepng.c.obj	7ea3bc7b2bd0129d
+1508	2138	7348273645913330	FKI_MSU_2nd_semester_2023_2024_Object_Detection.exe	eef04b797c18ed04
+28	702	7348275745717153	CMakeFiles/FKI_MSU_2nd_semester_2023_2024_Object_Detection.dir/image.c.obj	41225fcd12129d55
+705	1063	7348275749297577	FKI_MSU_2nd_semester_2023_2024_Object_Detection.exe	eef04b797c18ed04

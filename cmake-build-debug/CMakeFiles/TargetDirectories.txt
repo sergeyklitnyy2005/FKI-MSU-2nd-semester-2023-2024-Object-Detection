@@ -1,0 +1,3 @@
+C:/Users/ksv/Documents/GitHub/FKI-MSU-2nd-semester-2023-2024-Object-Detection/cmake-build-debug/CMakeFiles/FKI_MSU_2nd_semester_2023_2024_Object_Detection.dir
+C:/Users/ksv/Documents/GitHub/FKI-MSU-2nd-semester-2023-2024-Object-Detection/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/ksv/Documents/GitHub/FKI-MSU-2nd-semester-2023-2024-Object-Detection/cmake-build-debug/CMakeFiles/rebuild_cache.dir
