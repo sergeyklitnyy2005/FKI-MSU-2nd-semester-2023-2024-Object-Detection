@@ -8,4 +8,6 @@ include_directories(.)
 add_executable(FKI_MSU_2nd_semester_2023_2024_Object_Detection
         image.c
         lodepng.c
-        lodepng.h)
+        lodepng.h
+        gayssa.c
+        coloring.c)
