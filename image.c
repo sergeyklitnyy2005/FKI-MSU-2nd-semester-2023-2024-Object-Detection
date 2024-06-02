@@ -21,7 +21,7 @@ char* load_png_file(const char *filename, int *width, int *height) {
 int main() {
     int w = 0, h = 0;
 
-    char *filename = "C:\\Users\\ksv\\Documents\\GitHub\\FKI-MSU-2nd-semester-2023-2024-Object-Detection\\skull.png";
+    char *filename = "skull.png";
     char *picture = load_png_file(filename, &w, &h);
 
     if (picture == NULL) {
@@ -29,9 +29,11 @@ int main() {
         return -1;
     }
     applySobelFilter(picture, w, h);
-
+    unsigned error = lodepng_encode32_file("output2.png", picture, w, h);
+    
     colorComponents_filling(picture, w, h, 20);
-    char *output_filename = "C:\\Users\\ksv\\Documents\\GitHub\\FKI-MSU-2nd-semester-2023-2024-Object-Detection\\output.png";
+    
+    char *output_filename = "output.png";
     unsigned error = lodepng_encode32_file(output_filename, picture, w, h);
 
     if (error) {
