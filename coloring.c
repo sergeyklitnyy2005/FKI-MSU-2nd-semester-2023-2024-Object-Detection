@@ -1,8 +1,5 @@
-#include "lodepng.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
-#include <stdbool.h>
 #include <time.h>
 
 typedef struct Node {
@@ -39,13 +36,7 @@ void union_set(Node* x, Node* y, double epsilon) {
     }
 }
 
-Node* create_graph(const char *filename, int *width, int *height) {
-    unsigned char *image = NULL;
-    int error = lodepng_decode32_file(&image, width, height, filename);
-    if (error) {
-        printf("error %u: %s\n", error, lodepng_error_text(error));
-        return NULL;
-    }
+Node* create_graph(unsigned char *image, int *width, int *height) {
 
     Node* nodes = malloc(*width * *height * sizeof(Node));
     if (!nodes) {
@@ -98,7 +89,7 @@ void free_graph(Node* nodes) {
     free(nodes);
 }
 
-void color_components_and_count(Node* nodes, int width, int height) {
+void color_components_and_count(Node* nodes, unsigned char *image, int width, int height) {
     unsigned char* output_image = malloc(width * height * 4 * sizeof(unsigned char));
     int* component_sizes = calloc(width * height, sizeof(int));
     int total_components = 0;
@@ -125,32 +116,116 @@ void color_components_and_count(Node* nodes, int width, int height) {
         component_sizes[p - nodes]++;
     }
 
-    char *output_filename = "C:\\Users\\ksv\\Documents\\GitHub\\FKI-MSU-2nd-semester-2023-2024-Object-Detection\\output2.png";
-    lodepng_encode32_file(output_filename, output_image, width, height);
+//    char *output_filename = "C:\\Users\\ksv\\Documents\\GitHub\\FKI-MSU-2nd-semester-2023-2024-Object-Detection\\output2.png";
+//    lodepng_encode32_file(output_filename, output_image, width, height);
 
-    printf("Total components: %d\n", total_components);
+//    printf("Total components: %d\n", total_components);
 //    for (int i = 0; i < width * height; i++) {
 //        if (component_sizes[i] > 0) {
 //            printf("Component %d size: %d\n", i, component_sizes[i]);
 //        }
 //    }
 
+    for (int i = 0; i < width * height * 4; i++) {
+        image[i] = output_image[i];
+    }
+
     free(output_image);
     free(component_sizes);
 }
 
-int main() {
-    int width, height;
-    char *filename = "C:\\Users\\ksv\\Documents\\GitHub\\FKI-MSU-2nd-semester-2023-2024-Object-Detection\\output.png";
-    Node* nodes = create_graph(filename, &width, &height);
-    if (!nodes) {
-        return 1;
-    }
+void main_color_border(unsigned char* image, int w, int h, int epsilon) {
+    Node* nodes = create_graph(image, &w, &h);
 
-    double epsilon = 50.0;
-    find_components(nodes, width, height, epsilon);
-    color_components_and_count(nodes, width, height);
+    find_components(nodes, w, h, epsilon);
+    color_components_and_count(nodes, image, w, h);
 
     free_graph(nodes);
-    return 0;
+}
+
+
+void floodFill(unsigned char* image, int x, int y, int newColor1, int newColor2, int newColor3, int oldColor, int width, int height) {
+    typedef struct {int x, y;} Point;
+    int dx[] = {-1, 0, 1, 0};
+    int dy[] = {0, 1, 0, -1};
+
+    Point* stack = malloc(width * height * 4 * sizeof(Point));
+    long top = 0;
+
+    stack[top++] = (Point){x, y};
+
+    while(top > 0) {
+        Point p = stack[--top];
+
+        if(p.x < 0 || p.x >= width || p.y < 0 || p.y >= height)
+            continue;
+
+        int resultIndex = (p.y * width + p.x) * 4;
+        if(image[resultIndex] > oldColor)
+            continue;
+
+        image[resultIndex] = newColor1;
+        image[resultIndex + 1] = newColor2;
+        image[resultIndex + 2] = newColor3;
+
+
+        for(int i = 0; i < 4; i++) {
+            int nx = p.x + dx[i];
+            int ny = p.y + dy[i];
+            int nIndex = (ny * width + nx) * 4;
+            if(nx > 0 && nx < width && ny > 0 && ny < height && image[nIndex] <= oldColor) {
+                stack[top++] = (Point){nx, ny};
+            }
+        }
+    }
+    free(stack);
+}
+
+void colorComponents_filling(unsigned char* image, int width, int height, int epsilon) {
+    int color1 = epsilon * 2, color2 = epsilon * 2, color3 = epsilon * 2;
+    for(int y = 1; y < height - 1; y++) {
+        for(int x = 1; x < width - 1; x++) {
+            if(image[4 * (y * width + x)] < epsilon) {
+                floodFill(image, x, y, color1, color2, color3, epsilon, width, height);
+                color1 = rand() % (255 - epsilon * 2) + epsilon * 2;
+                color2 = rand() % (255 - epsilon * 2) + epsilon * 2;
+                color3 = rand() % (255 - epsilon * 2) + epsilon * 2;
+            }
+
+        }
+    }
+}
+
+void floodFillRecursive(unsigned char* image, int x, int y, int newColor1, int newColor2, int newColor3, int oldColor, int width, int height) {
+    if(x < 0 || x >= width || y < 0 || y >= height)
+        return;
+
+    int resultIndex = (y * width + x) * 4;
+    if(image[resultIndex] > oldColor)
+        return;
+
+    image[resultIndex] = newColor1;
+    image[resultIndex + 1] = newColor2;
+    image[resultIndex + 2] = newColor3;
+
+    floodFillRecursive(image, x+1, y, newColor1, newColor2, newColor3, oldColor, width, height);
+    floodFillRecursive(image, x-1, y, newColor1, newColor2, newColor3, oldColor, width, height);
+    floodFillRecursive(image, x, y+1, newColor1, newColor2, newColor3, oldColor, width, height);
+    floodFillRecursive(image, x, y-1, newColor1, newColor2, newColor3, oldColor, width, height);
+}
+
+
+void colorComponents_fillingRecursive(unsigned char* image, int width, int height, int epsilon) {
+    int color1, color2, color3;
+    for(int y = 1; y < height - 1; y++) {
+        for(int x = 1; x < width - 1; x++) {
+            if(image[4 * (y * width + x)] < epsilon) {
+                color1 = rand() % (255 - epsilon * 2) + epsilon * 2;
+                color2 = rand() % (255 - epsilon * 2) + epsilon * 2;
+                color3 = rand() % (255 - epsilon * 2) + epsilon * 2;
+                floodFillRecursive(image, x, y, color1, color2, color3, epsilon, width, height);
+
+            }
+        }
+    }
 }
