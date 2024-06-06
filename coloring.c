@@ -36,13 +36,9 @@ void union_set(Node* x, Node* y, double epsilon) {
     }
 }
 
-Node* create_graph(unsigned char *image, int *width, int *height) {
+Node* create_graph(unsigned char* image, int *width, int *height) {
 
     Node* nodes = malloc(*width * *height * sizeof(Node));
-    if (!nodes) {
-        free(image);
-        return NULL;
-    }
 
     for (unsigned y = 0; y < *height; ++y) {
         for (unsigned x = 0; x < *width; ++x) {
@@ -89,12 +85,11 @@ void free_graph(Node* nodes) {
     free(nodes);
 }
 
-void color_components_and_count(Node* nodes, unsigned char *image, int width, int height) {
+void color_components_and_count(Node* nodes, int width, int height) {
     unsigned char* output_image = malloc(width * height * 4 * sizeof(unsigned char));
     int* component_sizes = calloc(width * height, sizeof(int));
     int total_components = 0;
 
-    srand(time(NULL));
     for (int i = 0; i < width * height; i++) {
         Node* p = find(&nodes[i]);
         if (p == &nodes[i]) {
@@ -116,33 +111,27 @@ void color_components_and_count(Node* nodes, unsigned char *image, int width, in
         component_sizes[p - nodes]++;
     }
 
-//    char *output_filename = "C:\\Users\\ksv\\Documents\\GitHub\\FKI-MSU-2nd-semester-2023-2024-Object-Detection\\output2.png";
-//    lodepng_encode32_file(output_filename, output_image, width, height);
+    char *output_filename = "output2.png";
+    lodepng_encode32_file(output_filename, output_image, width, height);
 
-//    printf("Total components: %d\n", total_components);
+    // printf("Total components: %d\n", total_components);
 //    for (int i = 0; i < width * height; i++) {
 //        if (component_sizes[i] > 0) {
 //            printf("Component %d size: %d\n", i, component_sizes[i]);
 //        }
 //    }
 
-    for (int i = 0; i < width * height * 4; i++) {
-        image[i] = output_image[i];
-    }
-
     free(output_image);
     free(component_sizes);
 }
 
+
 void main_color_border(unsigned char* image, int w, int h, int epsilon) {
     Node* nodes = create_graph(image, &w, &h);
-
     find_components(nodes, w, h, epsilon);
-    color_components_and_count(nodes, image, w, h);
-
-    free_graph(nodes);
+    color_components_and_count(nodes, w, h);
+    free(nodes);
 }
-
 
 void floodFill(unsigned char* image, int x, int y, int newColor1, int newColor2, int newColor3, int oldColor, int width, int height) {
     typedef struct {int x, y;} Point;
